@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { auth, db } from "../../lib/FirebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";  // Import useRouter for redirection
-
+import Link from "next/link"
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +31,7 @@ export default function SignupPage() {
       // Redirect to the homepage (or another page as needed)
       router.push("/");
 
-      alert("Welcome to the Christian community! ✝️");
+      alert("Welcome to the Christian communaity! ✝️");
     } catch (err) {
       // Handle errors specifically
       if (err.code === 'auth/email-already-in-use') {
@@ -84,9 +84,9 @@ export default function SignupPage() {
           <p className="mt-4 text-center text-red-500 animate-fadeIn">{error}</p>
         )}
         <p className="mt-6 text-center text-gray-400">
-          <a href="/" className="text-blue-400 hover:underline">
+          <Link href="/" className="text-blue-400 hover:underline">
             Already have an account? Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>

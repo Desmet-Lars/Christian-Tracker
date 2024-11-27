@@ -49,7 +49,7 @@ function LoadingScreen() {
 function NotLoggedIn() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-800 text-white">
-      <p className="text-lg">You need to <a href="/" style={{textDecoration:"underline"}}>Login</a> in to access this page.</p>
+      <p className="text-lg">You need to <Link href="/" style={{textDecoration:"underline"}}>Login</Link> in to access this page.</p>
     </div>
   );
 }

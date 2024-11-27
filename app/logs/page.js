@@ -9,8 +9,6 @@ import Link from "next/link";
 
 export default function LogsPage() {
   const { user, loading: authLoading } = useAuth();
-  const [sins, setSins] = useState([]);
-  const [prayers, setPrayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sinCounts, setSinCounts] = useState({});
@@ -43,8 +41,6 @@ export default function LogsPage() {
         ...doc.data(),
       }));
 
-      setSins(sinsArray);
-      setPrayers(prayersArray);
 
       calculateSinCounts(sinsArray);
       calculatePrayerCounts(prayersArray);

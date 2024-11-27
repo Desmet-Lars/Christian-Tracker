@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { db, auth } from '../../lib/FirebaseConfig';
-import { addDoc, collection, doc, query, where, getDocs, setDoc, deleteDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, query, getDocs, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FaBookmark } from 'react-icons/fa';
 import Link from "next/link"
@@ -75,7 +75,7 @@ const Bible = () => {
         throw new Error('No verses found');
       }
     } catch (err) {
-      setError('Failed to fetch chapter. Please check the book and chapter number.');
+      setError('Failed to fetch chapter. Please check the book and chapter number.', err);
       setVerses([]);
     }
   };
