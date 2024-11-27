@@ -109,11 +109,11 @@ const Bible = () => {
       setError("You must be logged in to delete verses.");
       return;
     }
-  
+
     try {
       const userDocRef = doc(db, 'users', user.uid);
       const verseDocRef = doc(userDocRef, 'savedVerses', verseId);
-  
+
       await deleteDoc(verseDocRef); // Delete the verse from Firestore
       setSavedVerses((prev) => prev.filter((verse) => verse.id !== verseId)); // Remove it from local state
       console.log('Verse deleted successfully.');
@@ -121,7 +121,7 @@ const Bible = () => {
       console.error('Error deleting verse:', error);
     }
   };
-  
+
 
   const isVerseSaved = (verseNumber) => {
     return savedVerses.some(
@@ -142,21 +142,19 @@ const Bible = () => {
             </Link>
             <button
               onClick={() => setActiveSection('bible')}
-              className={`px-6 py-2 rounded-full text-lg font-semibold transition ${
-                activeSection === 'bible'
+              className={`px-6 py-2 rounded-full text-lg font-semibold transition ${activeSection === 'bible'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-500 hover:text-white'
-              }`}
+                }`}
             >
               Bible
             </button>
             <button
               onClick={() => setActiveSection('other')}
-              className={`px-6 py-2 rounded-full text-lg font-semibold transition ${
-                activeSection === 'other'
+              className={`px-6 py-2 rounded-full text-lg font-semibold transition ${activeSection === 'other'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-500 hover:text-white'
-              }`}
+                }`}
             >
               Other
             </button>
@@ -201,7 +199,7 @@ const Bible = () => {
                 {verses.map((verse) => (
                   <div key={verse.verse} className="mb-4">
                     <p className="text-lg flex items-center justify-between">
-                    <strong>{`${verse.verse}: `}</strong>
+                      <strong>{`${verse.verse}: `}</strong>
                       <span>{verse.text}</span>
                       <FaBookmark
                         className={`cursor-pointer hover:text-blue-600 ${isVerseSaved(verse.verse) ? 'text-gray-400' : 'text-blue-500'}`}
@@ -216,46 +214,46 @@ const Bible = () => {
           </div>
         )}
 
-{activeSection === 'other' && (
-  <div className="container mx-auto px-6 py-12">
-    <h1 className="text-5xl font-extrabold mb-16 text-center text-blue-600 dark:text-blue-400 tracking-tight">
-      Saved Verses
-    </h1>
-    <div className="text-center text-lg">
-      {savedVerses.length > 0 ? (
-        <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
-          {savedVerses.map((verse) => (
-            <div
-              key={verse.id}
-              className="bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-gray-700 dark:to-gray-800 p-6 rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-xl relative overflow-hidden"
-            >
-              <h2 className="text-2xl font-bold text-white mb-4">
-                {verse.book} {verse.chapter}:{verse.verseNumber}
-              </h2>
-              <p className="text-white dark:text-gray-300 italic text-base leading-relaxed">
-                "{verse.verseText}"
-              </p>
-              <p className="text-sm text-white dark:text-gray-400 mt-4">
-                Saved on: {new Date(verse.savedAt.seconds * 1000).toLocaleString()}
-              </p>
-              <button
-                onClick={() => handleDeleteVerse(verse.id)}
-                className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
-                title="Delete verse"
-              >
-                &times;
-              </button>
+        {activeSection === 'other' && (
+          <div className="container mx-auto px-6 py-12">
+            <h1 className="text-5xl font-extrabold mb-16 text-center text-blue-600 dark:text-blue-400 tracking-tight">
+              Saved Verses
+            </h1>
+            <div className="text-center text-lg">
+              {savedVerses.length > 0 ? (
+                <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
+                  {savedVerses.map((verse) => (
+                    <div
+                      key={verse.id}
+                      className="bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-gray-700 dark:to-gray-800 p-6 rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-xl relative overflow-hidden"
+                    >
+                      <h2 className="text-2xl font-bold text-white mb-4">
+                        {verse.book} {verse.chapter}:{verse.verseNumber}
+                      </h2>
+                      <p className="text-white dark:text-gray-300 italic text-base leading-relaxed">
+                        "{verse.verseText}"
+                      </p>
+                      <p className="text-sm text-white dark:text-gray-400 mt-4">
+                        Saved on: {new Date(verse.savedAt.seconds * 1000).toLocaleString()}
+                      </p>
+                      <button
+                        onClick={() => handleDeleteVerse(verse.id)}
+                        className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
+                        title="Delete verse"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400">
+                  You haven't saved any verses yet. Save some verses from the Bible section!
+                </p>
+              )}
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500 dark:text-gray-400">
-          You haven't saved any verses yet. Save some verses from the Bible section!
-        </p>
-      )}
-    </div>
-  </div>
-)}
+          </div>
+        )}
 
       </div>
     </div>
