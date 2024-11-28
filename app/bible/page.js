@@ -84,15 +84,17 @@ const Bible = () => {
 
   const saveVerse = async (book, chapter, verseNumber, verseText) => {
     if (!user) {
-      setError("You must be logged in to save verses.");
+      setError("You must be logged in to save or unsave verses.");
       return;
     }
 
     if (isVerseSaved(verseNumber)) {
-      console.log("This verse is already saved.");
-      return; // Prevent saving duplicates
+      // If the verse is already saved, unsave it
+      handleDeleteVerse(verseNumber);
+      return;
     }
 
+    // Otherwise, save the verse
     const data = {
       book,
       chapter,
@@ -119,21 +121,35 @@ const Bible = () => {
     }
   };
 
-  const handleDeleteVerse = async (verseId) => {
+  const handleDeleteVerse = async (verseNumber) => {
     if (!user) {
       setError("You must be logged in to delete verses.");
       return;
     }
 
     try {
+      // Find the verse document by matching book, chapter, and verse number
+      const verseDoc = savedVerses.find(
+        (verse) =>
+          verse.book === book &&
+          verse.chapter === chapter &&
+          verse.verseNumber === verseNumber
+      );
+
+      if (!verseDoc) return;
+
       const userDocRef = doc(db, 'users', user.uid);
-      const verseDocRef = doc(userDocRef, 'savedVerses', verseId);
+      const verseDocRef = doc(userDocRef, 'savedVerses', verseDoc.id);
 
       await deleteDoc(verseDocRef); // Delete the verse from Firestore
-      setSavedVerses((prev) => prev.filter((verse) => verse.id !== verseId)); // Remove it from local state
+      setSavedVerses((prev) =>
+        prev.filter((verse) => verse.id !== verseDoc.id)
+      ); // Remove it from local state
+
       console.log('Verse deleted successfully.');
     } catch (error) {
       console.error('Error deleting verse:', error);
+      setError("An error occurred while deleting the verse. Please try again.");
     }
   };
 
@@ -212,22 +228,22 @@ const Bible = () => {
               <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
                 <h2 className="text-3xl font-semibold mb-4 text-blue-500">{`${book} ${chapter}`}</h2>
                 {verses.map((verse) => (
-  <div key={verse.verse} className="mb-6">
-    <p className="text-l font-serif leading-4">
-      <strong className="text-blue-700">{`${verse.verse}: `}</strong>
-      <span>{verse.text}</span>
-    </p>
-    <FaBookmark
-      className={`mt-2 cursor-pointer hover:text-blue-600 ${
-        isVerseSaved(verse.verse) ? 'text-gray-400' : 'text-blue-500'
-      }`}
-      onClick={() => saveVerse(book, chapter, verse.verse, verse.text)}
-      title={
-        isVerseSaved(verse.verse) ? 'Verse already saved' : 'Save this verse'
-      }
-    />
-  </div>
-))}
+                <div key={verse.verse} className="mb-6">
+                    <p className="text-l font-serif leading-4">
+                    <strong className="text-blue-700">{`${verse.verse}: `}</strong>
+                    <span
+                        onClick={() => saveVerse(book, chapter, verse.verse, verse.text)} // Call saveVerse which handles both saving and unsaving
+                        title={isVerseSaved(verse.verse) ? 'Click to unsave this verse' : 'Click to save this verse'}
+                        className={`${
+                        isVerseSaved(verse.verse) ? 'text-green-500' : 'text-white-900'
+                        }`}
+                    >
+                        {verse.text}
+                    </span>
+                    </p>
+                </div>
+                ))}
+
 
               </div>
             )}
