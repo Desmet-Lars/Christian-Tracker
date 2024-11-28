@@ -251,8 +251,8 @@ const Bible = () => {
                         {verse.book} {verse.chapter}:{verse.verseNumber}
                       </h2>
                       <p className="text-white dark:text-gray-300 italic text-base leading-relaxed">
-                        "{verse.verseText}"
-                      </p>
+                            &quot;{verse.verseText}&quot;
+                        </p>
                       <p className="text-sm text-white dark:text-gray-400 mt-4">
                         Saved on: {new Date(verse.savedAt.seconds * 1000).toLocaleString()}
                       </p>
@@ -268,7 +268,7 @@ const Bible = () => {
                 </div>
               ) : (
                 <p className="text-gray-500 dark:text-gray-400">
-                  You haven't saved any verses yet. Save some verses from the Bible section!
+                    You haven&#39;t saved any verses yet. Save some verses from the Bible section!
                 </p>
               )}
             </div>
