@@ -47,6 +47,7 @@ export default function LogsPage() {
 
     } catch (err) {
       setError("There was an error fetching your data.");
+      console.error(err);
     }
   };
 
