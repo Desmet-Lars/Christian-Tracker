@@ -1,8 +1,11 @@
-// app/layout.js or pages/_app.js
 import { AuthProvider } from "../lib/AuthContext";
-import './globals.css'
+import './globals.css';
 
-export default function RootLayout({ children }) {
+type Props = {
+  children: React.ReactNode;
+};
+
+export default function RootLayout({ children }: Props) {
   return (
     <html lang="en">
       <body>
