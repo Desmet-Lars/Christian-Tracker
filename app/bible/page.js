@@ -46,7 +46,8 @@ const Bible = () => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, []); // No dependencies as `auth` and `fetchSavedVerses` are stable
+
 
   const fetchSavedVerses = async (userId) => {
     try {
@@ -75,7 +76,8 @@ const Bible = () => {
         throw new Error('No verses found');
       }
     } catch (err) {
-      setError('Failed to fetch chapter. Please check the book and chapter number.', err);
+      setError('Failed to fetch chapter. Please check the book and chapter number.');
+      console.error(err)
       setVerses([]);
     }
   };
@@ -86,24 +88,37 @@ const Bible = () => {
       return;
     }
 
+    if (isVerseSaved(verseNumber)) {
+      console.log("This verse is already saved.");
+      return; // Prevent saving duplicates
+    }
+
     const data = {
       book,
       chapter,
       verseNumber,
       verseText,
-      savedAt: new Date(),
+      savedAt: new Date(), // Add current timestamp
     };
 
     try {
-      const userDocRef = doc(db, 'users', user.uid);
-      const savedVersesCollection = collection(userDocRef, 'savedVerses');
-      const docRef = await addDoc(savedVersesCollection, data);
-      console.log('Verse saved successfully with ID: ', docRef.id);
+      const userDocRef = doc(db, 'users', user.uid); // Reference to the user's document
+      const savedVersesCollection = collection(userDocRef, 'savedVerses'); // Subcollection for saved verses
+      const docRef = await addDoc(savedVersesCollection, data); // Add the new verse to Firestore
+
+      console.log('Verse saved successfully with ID:', docRef.id);
+
+      // Update local state to include the newly saved verse
       setSavedVerses((prev) => [...prev, { id: docRef.id, ...data }]);
+
+      // Optional: Provide success feedback
+      setError(null);
     } catch (error) {
-      console.error('Error saving verse: ', error);
+      console.error('Error saving verse:', error);
+      setError("An error occurred while saving the verse. Please try again.");
     }
   };
+
   const handleDeleteVerse = async (verseId) => {
     if (!user) {
       setError("You must be logged in to delete verses.");
