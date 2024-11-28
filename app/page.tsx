@@ -1,8 +1,10 @@
 'use client';
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../lib/FirebaseConfig";
 import { useRouter } from 'next/navigation'; // Import useRouter for redirection
+import { doc, setDoc, getDoc } from "firebase/firestore"; // Firestore methods
+import { db } from "../lib/FirebaseConfig"; // Import Firestore
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +13,40 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false); // State to manage loading
   const router = useRouter(); // Initialize the router for redirection
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true); // Start loading
+    const provider = new GoogleAuthProvider();
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user; // Get the signed-in user
+
+      // Check if the user exists in Firestore
+      const userDocRef = doc(db, "users", user.uid); // Reference to the user's document in Firestore
+      const userDocSnap = await getDoc(userDocRef);
+
+      // If the user doesn't exist, create the user's document in Firestore
+      if (!userDocSnap.exists()) {
+        await setDoc(userDocRef, {
+          email: user.email,
+          createdAt: new Date(),
+        });
+      }
+
+      // Redirect after successful login
+      router.push("/home");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  // Handle email/password login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -18,9 +54,8 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-
       // Redirect after successful login
-      router.push("/home"); // Redirect to homepage or protected page
+      router.push("/home");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -35,6 +70,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 relative">
       {/* Background cross image */}
+
       <div className="absolute inset-0 bg-[url('./bg.jpg')] bg-cover bg-center z-[0]"></div>
 
       {/* Login form */}
@@ -67,6 +103,18 @@ export default function LoginPage() {
             {loading ? "Logging in..." : "Login"} {/* Show loading text */}
           </button>
         </form>
+
+        {/* Google sign-in button */}
+        <div className="mt-4">
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition duration-300"
+            disabled={loading} // Disable button when loading
+          >
+            {loading ? "Signing in..." : "Sign in with Google"}
+          </button>
+        </div>
+
         {error && (
           <p className="mt-4 text-center text-red-500 animate-fadeIn">{error}</p>
         )}
