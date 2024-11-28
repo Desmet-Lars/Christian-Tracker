@@ -137,7 +137,7 @@ const Bible = () => {
       <nav className="bg-white dark:bg-gray-800 shadow-md">
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-center space-x-8">
-            <Link href='/home' className='px-6 py-2 rounded-full text-lg font-semibold '>
+            <Link href='/home' className='px-6 py-2 rounded-full text-lg font-semibold bg-gray-700 text-gray-300 '>
               Back
             </Link>
             <button
@@ -197,18 +197,23 @@ const Bible = () => {
               <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
                 <h2 className="text-3xl font-semibold mb-4 text-blue-500">{`${book} ${chapter}`}</h2>
                 {verses.map((verse) => (
-                  <div key={verse.verse} className="mb-4">
-                    <p className="text-lg flex items-center justify-between">
-                      <strong>{`${verse.verse}: `}</strong>
-                      <span>{verse.text}</span>
-                      <FaBookmark
-                        className={`cursor-pointer hover:text-blue-600 ${isVerseSaved(verse.verse) ? 'text-gray-400' : 'text-blue-500'}`}
-                        onClick={() => saveVerse(book, chapter, verse.verse, verse.text)}
-                        title={isVerseSaved(verse.verse) ? "Verse already saved" : "Save this verse"}
-                      />
-                    </p>
-                  </div>
-                ))}
+  <div key={verse.verse} className="mb-6">
+    <p className="text-l font-serif leading-4">
+      <strong className="text-blue-700">{`${verse.verse}: `}</strong>
+      <span>{verse.text}</span>
+    </p>
+    <FaBookmark
+      className={`mt-2 cursor-pointer hover:text-blue-600 ${
+        isVerseSaved(verse.verse) ? 'text-gray-400' : 'text-blue-500'
+      }`}
+      onClick={() => saveVerse(book, chapter, verse.verse, verse.text)}
+      title={
+        isVerseSaved(verse.verse) ? 'Verse already saved' : 'Save this verse'
+      }
+    />
+  </div>
+))}
+
               </div>
             )}
           </div>
