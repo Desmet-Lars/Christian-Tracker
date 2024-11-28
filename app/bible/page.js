@@ -163,87 +163,91 @@ const Bible = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200">
-      <nav className="bg-white dark:bg-gray-800 shadow-md">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-200">
+      <nav className="backdrop-blur-md bg-white/70 dark:bg-gray-800/70 sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-center space-x-8">
-            <Link href='/home' className='px-6 py-2 rounded-full text-lg font-semibold bg-gray-700 text-gray-300 '>
+          <div className="flex justify-center space-x-6">
+            <Link href='/home' className='px-6 py-2.5 rounded-xl text-lg font-medium bg-gray-700 text-gray-200 hover:bg-gray-600 transition-all duration-300'>
               Back
             </Link>
-            <button
-              onClick={() => setActiveSection('bible')}
-              className={`px-6 py-2 rounded-full text-lg font-semibold transition ${activeSection === 'bible'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-500 hover:text-white'
+            {['bible', 'other'].map((section) => (
+              <button
+                key={section}
+                onClick={() => setActiveSection(section)}
+                className={`px-8 py-2.5 rounded-xl text-lg font-medium transition-all duration-300 ${
+                  activeSection === section
+                    ? 'bg-blue-600 text-white shadow-lg scale-105'
+                    : 'bg-gray-200/50 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300 hover:bg-blue-500/10'
                 }`}
-            >
-              Bible
-            </button>
-            <button
-              onClick={() => setActiveSection('other')}
-              className={`px-6 py-2 rounded-full text-lg font-semibold transition ${activeSection === 'other'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-500 hover:text-white'
-                }`}
-            >
-              Other
-            </button>
+              >
+                {section.charAt(0).toUpperCase() + section.slice(1)}
+              </button>
+            ))}
           </div>
         </div>
       </nav>
 
-
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-6 max-w-7xl">
         {activeSection === 'bible' && (
-          <div>
-            <h1 className="text-5xl font-extrabold mb-8 text-center text-blue-600">Read the Bible</h1>
-            <div className="mb-6 space-y-4">
+          <div className="space-y-8">
+            <h1 className="text-6xl font-extrabold mb-12 text-center bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
+              Read the Bible
+            </h1>
+
+            <div className="max-w-2xl mx-auto space-y-4">
               <select
                 value={book}
                 onChange={(e) => setBook(e.target.value)}
-                className="p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                className="p-4 border border-gray-200 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
               >
                 {bookList.map((b) => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
+
               <input
                 type="number"
                 min="1"
                 max="150"
                 value={chapter}
                 onChange={(e) => setChapter(e.target.value)}
-                className="p-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                className="p-4 border border-gray-200 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
               />
+
               <button
                 onClick={fetchChapter}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition duration-200 shadow-lg transform hover:scale-105"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
               >
                 Get Chapter
               </button>
             </div>
-            {error && <p className="text-red-500 text-center">{error}</p>}
+
+            {error && (
+              <div className="text-red-500 text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                {error}
+              </div>
+            )}
+
             {verses.length > 0 && (
-              <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-                <h2 className="text-3xl font-semibold mb-4 text-blue-500">{`${book} ${chapter}`}</h2>
+              <div className="max-w-4xl mx-auto p-8 bg-white/70 dark:bg-gray-800/70 rounded-2xl shadow-xl backdrop-blur-sm">
+                <h2 className="text-4xl font-bold mb-8 text-blue-600 dark:text-blue-400">{`${book} ${chapter}`}</h2>
                 {verses.map((verse) => (
-                <div key={verse.verse} className="mb-6">
-                    <p className="text-l font-serif leading-4">
-                    <strong className="text-blue-700">{`${verse.verse}: `}</strong>
-                    <span
-                        onClick={() => saveVerse(book, chapter, verse.verse, verse.text)} // Call saveVerse which handles both saving and unsaving
-                        title={isVerseSaved(verse.verse) ? 'Click to unsave this verse' : 'Click to save this verse'}
-                        className={`${
-                        isVerseSaved(verse.verse) ? 'text-green-500' : 'text-white-900'
+                  <div key={verse.verse} className="mb-6 group">
+                    <p className="text-lg font-serif leading-relaxed">
+                      <span className="text-blue-600 font-bold mr-2">{verse.verse}</span>
+                      <span
+                        onClick={() => saveVerse(book, chapter, verse.verse, verse.text)}
+                        className={`cursor-pointer transition-all duration-300 ${
+                          isVerseSaved(verse.verse)
+                            ? 'text-green-500 dark:text-green-400'
+                            : 'group-hover:text-blue-500'
                         }`}
-                    >
+                      >
                         {verse.text}
-                    </span>
+                      </span>
                     </p>
-                </div>
+                  </div>
                 ))}
-
-
               </div>
             )}
           </div>
@@ -251,45 +255,45 @@ const Bible = () => {
 
         {activeSection === 'other' && (
           <div className="container mx-auto px-6 py-12">
-            <h1 className="text-5xl font-extrabold mb-16 text-center text-blue-600 dark:text-blue-400 tracking-tight">
+            <h1 className="text-6xl font-extrabold mb-16 text-center bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
               Saved Verses
             </h1>
-            <div className="text-center text-lg">
+
+            <div className="text-center">
               {savedVerses.length > 0 ? (
                 <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
                   {savedVerses.map((verse) => (
                     <div
                       key={verse.id}
-                      className="bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-gray-700 dark:to-gray-800 p-6 rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-xl relative overflow-hidden"
+                      className="bg-gradient-to-br from-blue-600 to-blue-400 dark:from-gray-700 dark:to-gray-800 p-8 rounded-2xl shadow-xl transition-all duration-300 hover:scale-102 hover:shadow-2xl relative group backdrop-blur-sm"
                     >
                       <h2 className="text-2xl font-bold text-white mb-4">
                         {verse.book} {verse.chapter}:{verse.verseNumber}
                       </h2>
-                      <p className="text-white dark:text-gray-300 italic text-base leading-relaxed">
-                            &quot;{verse.verseText}&quot;
-                        </p>
-                      <p className="text-sm text-white dark:text-gray-400 mt-4">
-                        Saved on: {new Date(verse.savedAt.seconds * 1000).toLocaleString()}
+                      <p className="text-white/90 dark:text-gray-200 text-lg leading-relaxed">
+                        "{verse.verseText}"
+                      </p>
+                      <p className="text-sm text-white/70 mt-4">
+                        {new Date(verse.savedAt.seconds * 1000).toLocaleDateString()}
                       </p>
                       <button
                         onClick={() => handleDeleteVerse(verse.id)}
-                        className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
+                        className="opacity-0 group-hover:opacity-100 absolute top-4 right-4 bg-red-500/20 hover:bg-red-500 text-white p-2.5 rounded-xl transition-all duration-300"
                         title="Delete verse"
                       >
-                        &times;
+                        ×
                       </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 dark:text-gray-400">
-                    You haven&#39;t saved any verses yet. Save some verses from the Bible section!
+                <p className="text-xl text-gray-500 dark:text-gray-400">
+                  You haven't saved any verses yet. Save some verses from the Bible section!
                 </p>
               )}
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

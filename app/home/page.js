@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut, updateEmail, updatePassword, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { auth } from "../../lib/FirebaseConfig";
+import { auth, db } from "../../lib/FirebaseConfig";
 import { useRouter } from "next/navigation";
 import { FiLogOut, FiActivity, FiSettings } from 'react-icons/fi';
 import { FaChurch, FaPrayingHands, FaBible } from 'react-icons/fa';
 import { MdClose } from "react-icons/md";
-
-import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc, collection, addDoc } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 import Link from "next/link"
 function useAuth() {
   const [user, setUser] = useState(null);
@@ -39,7 +39,7 @@ function useAuth() {
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-800 text-white">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
       <div className="spinner-border animate-spin border-4 border-t-4 border-white rounded-full w-16 h-16"></div>
       <p className="text-lg ml-4">Loading...</p>
     </div>
@@ -48,8 +48,8 @@ function LoadingScreen() {
 
 function NotLoggedIn() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-800 text-white">
-      <p className="text-lg">You need to <Link href="/" style={{textDecoration:"underline"}}>Login</Link> in to access this page.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <p className="text-lg">You need to <Link href="/" className="underline">Login</Link> to access this page.</p>
     </div>
   );
 }
@@ -142,9 +142,8 @@ function SettingsOverlay({ onClose, user }) {
   };
 
   return (
-    <div className="absolute top-0 left-0 right-0 bottom-0 bg-gray-900 bg-opacity-80 z-50 flex justify-center items-center">
+    <div className="absolute top-0 left-0 right-0 bottom-0 bg-black bg-opacity-70 z-50 flex justify-center items-center">
       <div className="bg-gray-800 text-white p-8 w-full sm:w-96 rounded-lg shadow-lg relative">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition duration-300"
@@ -163,7 +162,7 @@ function SettingsOverlay({ onClose, user }) {
           <input
             type="text"
             id="username"
-            className="w-full p-3 bg-gray-700 text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full p-3 bg-gray-700 text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
             placeholder="Enter new username"
@@ -182,7 +181,7 @@ function SettingsOverlay({ onClose, user }) {
           <input
             type="email"
             id="email"
-            className="w-full p-3 bg-gray-700 text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full p-3 bg-gray-700 text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             placeholder="Enter new email"
@@ -231,6 +230,27 @@ function SettingsOverlay({ onClose, user }) {
 export default function ProtectedPage() {
   const { user, loading, logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const router = useRouter();
+
+  const handle_visit = async () => {
+    if (!user) {
+      console.error("User is not logged in.");
+      router.push('/');
+      return;
+    }
+
+    try {
+      const visitsRef = collection(db, 'users', user.uid, 'visits');
+
+      const docRef = await addDoc(visitsRef, {
+        visitedAt: Timestamp.now(),
+        visitType: "Church Visit",
+      });
+
+    } catch (error) {
+      console.error("Error logging visit:", error);
+    }
+  };
 
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
@@ -246,9 +266,7 @@ export default function ProtectedPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[url('./bgHome.png')] bg-cover bg-center z-[0] text-white p-4 relative">
-      {/* Logout and Account Settings Buttons close to each other */}
       <div className="absolute top-4 right-4 flex space-x-4">
-        {/* Logout Button */}
         <button
           onClick={logout}
           className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300 transform hover:scale-110 ease-in-out"
@@ -256,7 +274,6 @@ export default function ProtectedPage() {
           <FiLogOut className="text-lg" />
         </button>
 
-        {/* Account Settings Link */}
         <button
           onClick={toggleSettings}
           className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 transform hover:scale-110 ease-in-out"
@@ -266,40 +283,41 @@ export default function ProtectedPage() {
       </div>
 
       <h1 className="text-5xl font-extrabold mb-8 animate-fadeIn text-center tracking-wide text-white" style={{ textShadow: '4px 4px 8px rgba(0, 0, 0, 0.3)' }}>
-  Christian Log Tracker
-</h1>
+        Christian Log Tracker
+      </h1>
 
       <nav className="space-y-6 w-full max-w-lg sm:w-full">
-        <Link 
-          href="/sins" 
+        <Link
+          href="/sins"
           className="block bg-blue-600 text-white px-6 py-4 rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 ease-in-out text-center flex items-center justify-center space-x-3"
         >
           <FiActivity className="text-xl" />
           <span>Log Sins</span>
         </Link>
-        <Link 
-          href="/prayers" 
+        <Link
+          href="/prayers"
           className="block bg-green-600 text-white px-6 py-4 rounded-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 ease-in-out text-center flex items-center justify-center space-x-3"
         >
           <FaPrayingHands className="text-xl" />
           <span>Log Prayers</span>
         </Link>
-        <Link 
-          href="/visits" 
+        <Link
+          href=""
+          onClick={handle_visit}
           className="block bg-yellow-600 text-white px-6 py-4 rounded-lg hover:bg-yellow-700 transition duration-300 transform hover:scale-105 ease-in-out text-center flex items-center justify-center space-x-3"
         >
           <FaChurch className="text-xl" />
           <span>Log Church Visits</span>
         </Link>
-        <Link 
-          href="/logs" 
+        <Link
+          href="/logs"
           className="block bg-purple-600 text-white px-6 py-4 rounded-lg hover:bg-purple-700 transition duration-300 transform hover:scale-105 ease-in-out text-center flex items-center justify-center space-x-3"
         >
           <FiActivity className="text-xl" />
           <span>View Logs</span>
         </Link>
-        <Link 
-          href="/bible" 
+        <Link
+          href="/bible"
           className="block bg-red-600 text-white px-6 py-4 rounded-lg hover:bg-red-700 transition duration-300 transform hover:scale-105 ease-in-out text-center flex items-center justify-center space-x-3"
         >
           <FaBible className="text-xl" />
@@ -307,7 +325,6 @@ export default function ProtectedPage() {
         </Link>
       </nav>
 
-      {/* Settings Overlay */}
       {settingsOpen && <SettingsOverlay onClose={toggleSettings} user={user} />}
     </div>
   );
