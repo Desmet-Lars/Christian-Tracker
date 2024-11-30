@@ -271,7 +271,7 @@ const Bible = () => {
                         {verse.book} {verse.chapter}:{verse.verseNumber}
                       </h2>
                       <p className="text-white/90 dark:text-gray-200 text-lg leading-relaxed">
-                        "{verse.verseText}"
+                        &quot;{verse.verseText}&quot;
                       </p>
                       <p className="text-sm text-white/70 mt-4">
                         {new Date(verse.savedAt.seconds * 1000).toLocaleDateString()}

@@ -18,10 +18,10 @@ function useAuth() {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
-    });
+    }, [db]);
 
     return () => unsubscribe();
-  }, []);
+  }, [user, db]);
 
   const logout = async () => {
     try {
@@ -246,6 +246,7 @@ export default function ProtectedPage() {
         visitedAt: Timestamp.now(),
         visitType: "Church Visit",
       });
+      console.log('Visit logged with ID:', docRef.id);
 
     } catch (error) {
       console.error("Error logging visit:", error);

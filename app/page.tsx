@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation'; // Import useRouter for redirection
 import { doc, setDoc, getDoc } from "firebase/firestore"; // Firestore methods
 import { db } from "../lib/FirebaseConfig"; // Import Firestore
 
+// Add this interface at the top of the file, after the imports
+interface FirebaseError extends Error {
+  code?: string;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,27 +30,31 @@ export default function LoginPage() {
         console.log("Popup sign in successful:", result);
         router.push("/home");
         return;
-      } catch (popupError: any) {
+      } catch (popupError: unknown) {
         console.log("Popup failed, trying redirect...", popupError);
 
         // If popup fails, fall back to redirect
-        if (popupError.code === 'auth/popup-blocked' ||
-            popupError.code === 'auth/popup-closed-by-user' ||
-            popupError.message.includes('Cross-Origin-Opener-Policy')) {
+        if (popupError instanceof Error &&
+            (popupError as FirebaseError).code && (
+            (popupError as FirebaseError).code === 'auth/popup-blocked' ||
+            (popupError as FirebaseError).code === 'auth/popup-closed-by-user' ||
+            popupError.message.includes('Cross-Origin-Opener-Policy'))) {
           console.log("Switching to redirect method");
           await signInWithRedirect(auth, provider);
           return;
         }
 
-        // If it's another type of error, throw it
         throw popupError;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Sign in error:", err);
-      if (err.code === 'auth/cancelled-popup-request') {
-        setError("Please try again");
-      } else if (err instanceof Error) {
-        setError(err.message);
+      if (err instanceof Error) {
+        const firebaseError = err as FirebaseError;
+        if (firebaseError.code === 'auth/cancelled-popup-request') {
+          setError("Please try again");
+        } else {
+          setError(err.message);
+        }
       } else {
         setError("An unknown error occurred");
       }

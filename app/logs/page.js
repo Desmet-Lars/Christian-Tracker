@@ -23,7 +23,7 @@ export default function LogsPage() {
         fetchSinsAndPrayers(user.uid);
       }
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, router, fetchSinsAndPrayers]);
 
   const fetchSinsAndPrayers = async (userId) => {
     try {
