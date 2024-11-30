@@ -4,7 +4,7 @@ import { useAuth } from "../../lib/AuthContext";
 import { collection, query, getDocs } from "firebase/firestore";
 import { db } from "../../lib/FirebaseConfig";
 import { useRouter } from "next/navigation";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from "date-fns";
 import Link from "next/link";
 
 export default function LogsPage() {
@@ -13,6 +13,7 @@ export default function LogsPage() {
   const [error, setError] = useState("");
   const [sinCounts, setSinCounts] = useState({});
   const [prayerCounts, setPrayerCounts] = useState({});
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const router = useRouter();
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function LogsPage() {
         fetchSinsAndPrayers(user.uid);
       }
     }
-  }, [authLoading, user, router, fetchSinsAndPrayers]);
+  }, [authLoading, user, router]);
 
   const fetchSinsAndPrayers = async (userId) => {
     try {
@@ -41,21 +42,25 @@ export default function LogsPage() {
         ...doc.data(),
       }));
 
-
       calculateSinCounts(sinsArray);
       calculatePrayerCounts(prayersArray);
+
+      setLoading(false); // Set loading to false after data is fetched and processed
 
     } catch (err) {
       setError("There was an error fetching your data.");
       console.error(err);
+      setLoading(false); // Set loading to false on error too
     }
   };
 
   const calculateSinCounts = (sins) => {
     const counts = {};
     sins.forEach((sin) => {
-      const sinDate = format(sin.createdAt.seconds * 1000, "yyyy-MM-dd");
-      counts[sinDate] = (counts[sinDate] || 0) + 1;
+      if (sin.createdAt && sin.createdAt.seconds) {
+        const sinDate = format(new Date(sin.createdAt.seconds * 1000), "yyyy-MM-dd");
+        counts[sinDate] = (counts[sinDate] || 0) + 1;
+      }
     });
     setSinCounts(counts);
   };
@@ -63,22 +68,17 @@ export default function LogsPage() {
   const calculatePrayerCounts = (prayers) => {
     const counts = {};
     prayers.forEach((prayer) => {
-      const prayerDate = format(prayer.createdAt.seconds * 1000, "yyyy-MM-dd");
-      counts[prayerDate] = (counts[prayerDate] || 0) + 1;
+      if (prayer.createdAt && prayer.createdAt.seconds) {
+        const prayerDate = format(new Date(prayer.createdAt.seconds * 1000), "yyyy-MM-dd");
+        counts[prayerDate] = (counts[prayerDate] || 0) + 1;
+      }
     });
     setPrayerCounts(counts);
   };
 
-  useEffect(() => {
-    if (Object.keys(sinCounts).length > 0 && Object.keys(prayerCounts).length > 0) {
-      setLoading(false); // Set loading to false when both sins and prayers are loaded
-    }
-  }, [sinCounts, prayerCounts]);
-
   const generateCalendar = () => {
-    const today = new Date();
-    const startOfMonthDate = startOfMonth(today);
-    const endOfMonthDate = endOfMonth(today);
+    const startOfMonthDate = startOfMonth(currentMonth);
+    const endOfMonthDate = endOfMonth(currentMonth);
     return eachDayOfInterval({ start: startOfMonthDate, end: endOfMonthDate });
   };
 
@@ -95,6 +95,14 @@ export default function LogsPage() {
 
   const getPrayerLabel = (count) => {
     return count === 1 ? "prayer" : "prayers";
+  };
+
+  const goToPreviousMonth = () => {
+    setCurrentMonth(prevMonth => subMonths(prevMonth, 1));
+  };
+
+  const goToNextMonth = () => {
+    setCurrentMonth(prevMonth => addMonths(prevMonth, 1));
   };
 
   if (authLoading || loading) {
@@ -126,10 +134,29 @@ export default function LogsPage() {
         Back to Home
       </button>
 
+      <div className="flex items-center justify-between w-full max-w-2xl mb-4">
+        <button
+          onClick={goToPreviousMonth}
+          className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition"
+        >
+          Previous Month
+        </button>
+        <h2 className="text-xl font-bold">
+          {format(currentMonth, 'MMMM yyyy')}
+        </h2>
+        <button
+          onClick={goToNextMonth}
+          className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition"
+        >
+          Next Month
+        </button>
+      </div>
+
       <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 sm:gap-4">
         {calendarDays.map((day) => {
-          const sinCount = sinCounts[format(day, "yyyy-MM-dd")] || 0;
-          const prayerCount = prayerCounts[format(day, "yyyy-MM-dd")] || 0;
+          const dayKey = format(day, "yyyy-MM-dd");
+          const sinCount = sinCounts[dayKey] || 0;
+          const prayerCount = prayerCounts[dayKey] || 0;
 
           return (
             <div
